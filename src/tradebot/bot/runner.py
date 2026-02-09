@@ -46,8 +46,9 @@ class BotState:
 
 
 class BotRunner:
-    def __init__(self, settings: Settings, strategy_name: str = "ema_filter"):
+    def __init__(self, settings: Settings, strategy_name: str | None = None):
         self.s = settings
+        strategy_name = strategy_name or self.s.strategy_name
         self.client = CoinbaseClient(
             base_url=self.s.base_url,
             jwt_host=self.s.jwt_host,
@@ -58,7 +59,10 @@ class BotRunner:
         StratCls = STRATEGY_REGISTRY.get(strategy_name)
         if StratCls is None:
             raise RuntimeError(f"Unknown strategy '{strategy_name}'. Known: {list(STRATEGY_REGISTRY)}")
-        self.strategy = StratCls(ema_length=self.s.ema_length)
+        if strategy_name == "ema_filter":
+            self.strategy = StratCls(ema_length=self.s.ema_length)
+        else:
+            self.strategy = StratCls()
 
         self.trader = Trader(
             self.client,

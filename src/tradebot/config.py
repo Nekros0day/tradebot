@@ -64,6 +64,8 @@ class Settings:
     rebalance_tol_pct: float = 0.02
     min_position_notional: float = 25.0
 
+    strategy_name: str = "ema_filter"
+
     @staticmethod
     def load() -> "Settings":
         # load .env if present
@@ -102,4 +104,5 @@ class Settings:
             target_long_pct=_getenv_float("TARGET_LONG_PCT", 0.98),
             rebalance_tol_pct=_getenv_float("REBALANCE_TOL_PCT", 0.02),
             min_position_notional=_getenv_float("MIN_POSITION_NOTIONAL", 25.0),
+            strategy_name=_getenv("STRATEGY", "ema_filter") or "ema_filter",
         )
