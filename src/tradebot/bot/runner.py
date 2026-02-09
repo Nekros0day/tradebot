@@ -81,6 +81,7 @@ class BotRunner:
         )
 
         self.state = BotState.load(self.s.state_path)
+        log.info(f"Using strategy: {self.strategy.name} (key={strategy_name})")
 
     def run_once(self) -> None:
         lookback = max(self.strategy.lookback_bars, self.s.ema_length + 30)
