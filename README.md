@@ -1,28 +1,71 @@
-# BTC EMA(140) Coinbase Bot (Advanced Trade API)
+# BTC Coinbase Trade Bot (Advanced Trade API)
 
-This bot trades BTC-USD long/flat based on a daily EMA filter:
-- If Close > EMA(140): target position = LONG
-- Else: target position = FLAT
+A simple, conservative **long/flat** BTC bot for Coinbase Advanced Trade.
+It uses **daily candles** and can run in **dry-run** mode by default.
 
-## Quick start
-1) Create a Python venv
-2) `pip install -r requirements.txt`
-3) Copy `.env.example` to `.env` and fill in:
-   - COINBASE_API_KEY_NAME
-   - COINBASE_API_PRIVATE_KEY (ECDSA PEM)
+It’s designed like a small repo so you can add strategies cleanly.
 
-## Run (dry-run by default)
-- One-shot:
-  `python -m tradebot run --once`
+---
 
-- Loop:
-  `python -m tradebot run --loop`
+## What this bot does
 
-## Safety
-- Starts with DRY_RUN=true
-- Has MAX_QUOTE_PER_TRADE to prevent spending your full balance
-- Stores last processed candle in STATE_PATH to reduce repeat actions
+- Fetches the latest **closed daily** candle for your product (default `BTC-EUR` or `BTC-USD`)
+- Computes a **target position**:  
+  - `1` = LONG (hold BTC)
+  - `0` = FLAT (hold quote currency, e.g. EUR/USD)
+- Rebalances your account toward that target using **market IOC** orders (or logs the payload in dry-run)
+- Stores state in `STATE_PATH` so it does not act twice on the same candle
 
-## Add new strategies
-Create a new file in `src/tradebot/strategies/`, subclass `Strategy`,
-then register it in `strategies/__init__.py`.
+> Important: Because this is **daily**, you’ll often see:  
+> **"No new closed candle since last run; skipping."**  
+> That’s expected until the next daily candle closes (typically **00:00 UTC**).
+
+---
+
+## Strategies available
+
+Set `STRATEGY` in your `.env`:
+
+### 1) `ema_filter` (classic)
+**Name:** `EMAFilter(140)`  
+**Rule:** LONG if `Close > EMA(140)` else FLAT  
+Best as a simple baseline.
+
+### 2) `ema140_ema20_50`
+**Name:** `EMA140+EMA20/50`  
+**Rule:** LONG if:
+- `Close > EMA(140)` **and**
+- `EMA(20) > EMA(50)`
+
+This reduces chop vs EMA140 alone.
+
+### 3) `mtf_weeklyema26_daily20_50`
+**Name:** `MTF(WeeklyEMA26)+Daily20/50`  
+**Rule:** LONG if:
+- Weekly regime is bullish: `WeeklyClose > WeeklyEMA(26)` **and**
+- Daily trigger confirms: `EMA(20) > EMA(50)`
+
+Weekly regime is computed by resampling daily candles (`W-SUN`, last close of the week) and forward-filling to daily.
+
+---
+
+## Coinbase API key setup (Advanced Trade)
+
+You need a **Coinbase Advanced Trade API key** using **ECDSA (ES256)**.
+
+1) In Coinbase (Advanced Trade / Developer / API):
+   - Create a new API key (Advanced Trade)
+   - Choose permissions:
+     - ✅ `can_view`
+     - ✅ `can_trade`
+     - ❌ `can_transfer` (recommended OFF for safety)
+2) Copy:
+   - **API Key Name** (the “kid” / key id)
+   - **Private Key** (PEM)
+
+### Permissions check
+
+Run:
+
+```bash
+python -m tradebot.scripts.check_permissions --raw
