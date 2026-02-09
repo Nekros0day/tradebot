@@ -1,0 +1,15 @@
+services:
+  tradebot:
+    build: .
+    container_name: tradebot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Persist bot state on host (so restarts don't retrade same candle)
+      - ./state:/app/state
+    environment:
+      # Force state path inside container to mounted volume
+      STATE_PATH: "/app/state/state.json"
+      # Optional: set timezone for logs
+      TZ: "Europe/Stockholm"
