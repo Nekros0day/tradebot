@@ -1,0 +1,2 @@
+class CoinbaseAPIError(RuntimeError):
+    pass
