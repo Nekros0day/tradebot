@@ -13,10 +13,10 @@ This bot trades BTC-USD long/flat based on a daily EMA filter:
 
 ## Run (dry-run by default)
 - One-shot:
-  `python -m btc_ema_bot run --once`
+  `python -m tradebot run --once`
 
 - Loop:
-  `python -m btc_ema_bot run --loop`
+  `python -m tradebot run --loop`
 
 ## Safety
 - Starts with DRY_RUN=true
@@ -24,5 +24,5 @@ This bot trades BTC-USD long/flat based on a daily EMA filter:
 - Stores last processed candle in STATE_PATH to reduce repeat actions
 
 ## Add new strategies
-Create a new file in `src/btc_ema_bot/strategies/`, subclass `Strategy`,
+Create a new file in `src/tradebot/strategies/`, subclass `Strategy`,
 then register it in `strategies/__init__.py`.
