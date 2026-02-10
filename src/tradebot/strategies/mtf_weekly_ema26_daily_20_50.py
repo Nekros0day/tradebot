@@ -27,8 +27,8 @@ class MTFWeeklyEMA26Daily2050Strategy:
         self.ema_slow = int(ema_slow)
 
         # Need enough daily bars for weekly EMA stabilization:
-        # 26 weeks ~ 182 days, plus buffer.
-        self.lookback_bars = max(26 * 7 + 90, self.ema_slow + 120)
+        # weekly_ema_weeks of daily data + warmup buffer.
+        self.lookback_bars = max(self.weekly_ema_weeks * 7 + 90, self.ema_slow + 120)
 
     @staticmethod
     def _ema(s: pd.Series, n: int) -> pd.Series:
@@ -53,7 +53,8 @@ class MTFWeeklyEMA26Daily2050Strategy:
 
         weekly_regime_on = float(weekly_regime_daily.iloc[-1]) > 0.5
 
-        target = 1 if (weekly_regime_on and daily_trigger_on) else 0
+        enough_weekly_history = len(weekly) >= self.weekly_ema_weeks
+        target = 1 if (enough_weekly_history and weekly_regime_on and daily_trigger_on) else 0
 
         return Signal(
             target_position=target,
@@ -65,5 +66,6 @@ class MTFWeeklyEMA26Daily2050Strategy:
                 "weekly_ema": str(float(weekly_ema.iloc[-1])) if len(weekly_ema) else "nan",
                 "weekly_regime_on": str(int(weekly_regime_on)),
                 "daily_trigger_on": str(int(daily_trigger_on)),
+                "enough_weekly_history": str(int(enough_weekly_history)),
             },
         )

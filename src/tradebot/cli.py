@@ -17,7 +17,7 @@ def main():
     mode.add_argument("--once", action="store_true", help="Run one cycle and exit")
     mode.add_argument("--loop", action="store_true", help="Run continuously (polling)")
 
-    runp.add_argument("--strategy", default="ema_filter", help="Strategy name (default: ema_filter)")
+    runp.add_argument("--strategy", default=None, help="Strategy name (overrides STRATEGY from env)")
 
     args = parser.parse_args()
 
