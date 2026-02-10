@@ -47,6 +47,8 @@ This reduces chop vs EMA140 alone.
 
 Weekly regime is computed by resampling daily candles (`W-SUN`, last close of the week) and forward-filling to daily.
 
+**History behavior:** the bot fetches the lookback window directly from Coinbase on each run (it does **not** rely on local accumulation). So you do **not** need to wait a week after starting the bot, as long as Coinbase has enough historical daily candles for that product.
+
 ---
 
 ## Coinbase API key setup (Advanced Trade)
