@@ -102,11 +102,17 @@ class BotRunner:
         log.info(f"candles type={type(fetch.df)} shape={fetch.df.shape} cols={list(fetch.df.columns)}")
         log.info(f"tail:\n{fetch.df.tail(3)}")
 
-        last_close = D(sig.info["last_close"])
-        last_ema = D(sig.info["last_ema"])
+        last_close_raw = sig.info.get("last_close", candles["close"].iloc[-1])
+        last_close = D(str(last_close_raw))
+
+        details = []
+        for key in ("last_ema", "ema_long", "ema_fast", "ema_slow", "weekly_ema", "weekly_close"):
+            if key in sig.info:
+                details.append(f"{key}={sig.info[key]}")
+        detail_str = " ".join(details)
 
         log.info(
-            f"Signal {self.strategy.name}: close={to_str(last_close)} ema={to_str(last_ema)} -> target={sig.target_position}"
+            f"Signal {self.strategy.name}: close={to_str(last_close)} {detail_str} -> target={sig.target_position}"
         )
 
         # Execute (rebalance)
